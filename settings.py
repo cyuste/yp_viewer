@@ -7,13 +7,11 @@ import ConfigParser
 import logging
 from UserDict import IterableUserDict
 
-CONFIG_DIR = '.screenly/'
-CONFIG_FILE = 'screenly.conf'
+CONFIG_DIR = '.yustplayit/'
+CONFIG_FILE = 'viewer.conf'
 DEFAULTS = {
     'main': {
-        'database': CONFIG_DIR + 'screenly.db',
-        'listen': '0.0.0.0:8080',
-        'assetdir': 'screenly_assets',
+        'assetdir': 'yustplayit_assets',
     },
     'viewer': {
         'show_splash': True,
@@ -29,7 +27,7 @@ DEFAULTS = {
 
 # Initiate logging
 logging.basicConfig(level=logging.INFO,
-                    filename='/tmp/screenly_viewer.log',
+                    filename='/tmp/yustplayit_viewer.log',
                     format='%(asctime)s %(message)s',
                     datefmt='%a, %d %b %Y %H:%M:%S')
 

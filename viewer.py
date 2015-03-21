@@ -13,25 +13,28 @@ from requests import get as req_get
 from requests import head as req_head
 from time import sleep, time
 from json import load as json_load
+from json import loads as json_loads
 from signal import signal, SIGUSR1, SIGUSR2
 import logging
 import sh
+import urllib2 as urllib
+#import urllib.request as urllib #Python3
 
 from settings import settings
 import html_templates
 from utils import url_fails
-import db
-import assets_helper
 
 SPLASH_DELAY = 60  # secs
 EMPTY_PL_DELAY = 5  # secs
 
-BLACK_PAGE = '/tmp/screenly_html/black_page.html'
-WATCHDOG_PATH = '/tmp/screenly.watchdog'
-SCREENLY_HTML = '/tmp/screenly_html/'
-LOAD_SCREEN = '/screenly/loading.jpg'  # relative to $HOME
-UZBLRC = '/screenly/misc/uzbl.rc'  # relative to $HOME
-INTRO = '/screenly/intro-template.html'
+BLACK_PAGE = '/tmp/yustplayit_html/black_page.html'
+WATCHDOG_PATH = '/tmp/yustplayit.watchdog'
+SCREENLY_HTML = '/tmp/yustplayit_html/'
+LOAD_SCREEN = '/yustplayit/loading.jpg'  # relative to $HOME
+UZBLRC = '/yustplayit/misc/uzbl.rc'  # relative to $HOME
+INTRO = '/yustplayit/intro-template.html'
+PLAYLIST_URL = 'http://localhost/yustplayit/web/app_dev.php/getContentList/'
+
 
 current_browser_url = None
 browser = None
@@ -76,45 +79,38 @@ class Scheduler(object):
         logging.debug('refresh_playlist')
         time_cur = datetime.utcnow()
         logging.debug('refresh: counter: (%s) deadline (%s) timecur (%s)', self.counter, self.deadline, time_cur)
-        if self.get_db_mtime() > self.last_update_db_mtime:
-            logging.debug('updating playlist due to database modification')
-            self.update_playlist()
-        elif settings['shuffle_playlist'] and self.counter >= 5:
-            self.update_playlist()
-        elif self.deadline and self.deadline <= time_cur:
+        if self.index == self.nassets:
+            logging.debug('updating playlist ')
             self.update_playlist()
 
     def update_playlist(self):
         logging.debug('update_playlist')
-        self.last_update_db_mtime = self.get_db_mtime()
-        (self.assets, self.deadline) = generate_asset_list()
+        self.assets = generate_asset_list()
         self.nassets = len(self.assets)
         self.counter = 0
         self.index = 0
         logging.debug('update_playlist done, count %s, counter %s, index %s, deadline %s', self.nassets, self.counter, self.index, self.deadline)
 
-    def get_db_mtime(self):
-        # get database file last modification time
-        try:
-            return path.getmtime(settings['database'])
-        except:
-            return 0
-
-
 def generate_asset_list():
     logging.info('Generating asset-list...')
-
-    now = datetime.utcnow()
-    enabled_assets = [a for a in assets_helper.read(db_conn) if a['is_enabled']]
-    future_dates = [a[k] for a in enabled_assets for k in ['start_date', 'end_date'] if a[k] > now]
-    deadline = sorted(future_dates)[0] if future_dates else None
-    logging.debug('generate_asset_list deadline: %s', deadline)
-
-    playlist = assets_helper.get_playlist(db_conn)
+    
+    """ TODO obtain device id from somewhere """
+    dev_id = 1
+    response = urllib.urlopen(PLAYLIST_URL+str(dev_id))
+    json = response.read()
+    playlist = json_loads(json)   
+    playlist = filter(dummy_true, json)  
+    
     if settings['shuffle_playlist']:
         shuffle(playlist)
-    return (playlist, deadline)
+    return (playlist)
 
+def dummy_true(asset):
+    """
+    To be replaced with a function that actually does something,
+    for example check validity
+    """
+    return True
 
 def watchdog():
     """Notify the watchdog file to be used with the watchdog-device."""
@@ -321,7 +317,6 @@ def setup():
     signal(SIGUSR2, sigusr2)
 
     load_settings()
-    db_conn = db.conn(settings['database'])
 
     sh.mkdir(SCREENLY_HTML, p=True)
     html_templates.black_page(BLACK_PAGE)
@@ -345,14 +340,8 @@ def main():
     if pro_init():
         return
 
-    if settings['show_splash']:
-        url = 'http://{0}:{1}/splash_page'.format(settings.get_listen_ip(), settings.get_listen_port())
-        wait_for_splash_page(url)
-        load_browser(url=url)
-        sleep(SPLASH_DELAY)
-    else:
-        url = 'file://' + BLACK_PAGE
-        load_browser(url=url)
+    url = 'file://' + BLACK_PAGE
+    load_browser(url=url)
 
     scheduler = Scheduler()
     logging.debug('Entering infinite loop.')

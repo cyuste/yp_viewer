@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LOG=/tmp/screenly_xloader.log
+LOG=/tmp/yustplayit_xloader.log
 
 echo "Disabling screen power savings..." > $LOG
 
@@ -16,8 +16,8 @@ while true; do
 	killall uzbl-core
 	killall omxplayer omxplayer.bin
 	rm -f /tmp/uzbl_*
-	rm -f /tmp/screenly_html/*
+	rm -f /tmp/yustplayit_html/*
 
 	# Launch the viewer
-	python ~/screenly/viewer.py >> $LOG 2>&1
+	python ~/yustplayit/viewer.py >> $LOG 2>&1
 done

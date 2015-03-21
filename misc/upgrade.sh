@@ -1,13 +1,13 @@
 #!/bin/bash
 
-SCREENLY="/home/pi/screenly"
+YUSTPLAYIT="/home/pi/yustplayit"
 
-echo "Upgrading Screenly OSE..."
+echo "Upgrading Yustplayit viewer..."
 
 echo "Ensuring proper permission is set..."
-sudo chown -R pi:pi $SCREENLY
-sudo chown -R pi:pi /home/pi/screenly_assets
-sudo chown -R pi:pi /home/pi/.screenly
+sudo chown -R pi:pi $YUSTPLAYIT
+sudo chown -R pi:pi /home/pi/yustplayit_assets
+sudo chown -R pi:pi /home/pi/.yustplayit
 
 echo "Removing feh (no longer needed)..."
 sudo apt-get -y -qq remove feh
@@ -21,17 +21,11 @@ sudo killall unclutter
 sudo sed -e 's/^#xserver-command=X$/xserver-command=X -nocursor/g' -i /etc/lightdm/lightdm.conf
 
 echo "Fetching the latest update..."
-cd $SCREENLY
+cd $YUSTPLAYIT
 git pull
 
 echo "Ensuring all Python modules are installed..."
-sudo pip install -r $SCREENLY/requirements.txt -q
-
-echo "Running migration..."
-python $SCREENLY/misc/migrate.py
-
-echo "Restarting app-server..."
-sudo supervisorctl restart screenly
+sudo pip install -r $YUSTPLAYIT/requirements.txt -q
 
 echo "Restarting viewer module..."
 pkill -f "viewer.py"
@@ -49,6 +43,5 @@ if grep -q framebuffer_ignore_alpha /boot/config.txt; then
 else
   echo 'framebuffer_ignore_alpha=1' | sudo tee -a /boot/config.txt > /dev/null
 fi
-
 
 echo "Done! Please reboot."

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "Installing Screenly OSE"
+echo "Installing Yustplayit"
 
 ## Simple disk storage check. Naively assumes root partition holds all system data.
 ROOT_AVAIL=$(df -k / | tail -n 1 | awk {'print $4'})
@@ -34,14 +34,14 @@ sudo apt-get -y -qq install \
     watchdog chkconfig feh > /dev/null
 
 echo "Downloading Screenly-OSE..."
-git clone -q https://github.com/wireload/screenly-ose.git "$HOME/screenly" > /dev/null
+git clone -q https://github.com/cyuste/yp_viewer.git "$HOME/yustplayit" > /dev/null
 
 echo "Installing more dependencies..."
-sudo pip install -r "$HOME/screenly/requirements.txt" -q > /dev/null
+sudo pip install -r "$HOME/yustplayit/requirements.txt" -q > /dev/null
 
-echo "Adding Screenly to X auto start..."
+echo "Adding Viewer to X auto start..."
 mkdir -p "$HOME/.config/lxsession/LXDE$SUFFIX/"
-echo "@$HOME/screenly/misc/xloader.sh" > "$HOME/.config/lxsession/LXDE$SUFFIX/autostart"
+echo "@$HOME/yustplayit/misc/xloader.sh" > "$HOME/.config/lxsession/LXDE$SUFFIX/autostart"
 
 echo "Increasing swap space to 500MB..."
 echo "CONF_SWAPSIZE=500" > "$HOME/dphys-swapfile"
@@ -49,8 +49,8 @@ sudo cp /etc/dphys-swapfile /etc/dphys-swapfile.bak
 sudo mv "$HOME/dphys-swapfile" /etc/dphys-swapfile
 
 echo "Adding Screenly's config-file"
-mkdir -p "$HOME/.screenly"
-cp "$HOME/screenly/misc/screenly.conf" "$HOME/.screenly/"
+mkdir -p "$HOME/.yustplayit"
+cp "$HOME/yustplayit/misc/viewer.conf" "$HOME/.yustplayit/"
 
 echo "Enabling Watchdog..."
 sudo modprobe bcm2708_wdog > /dev/null
@@ -61,18 +61,14 @@ sudo cp /etc/watchdog.conf /etc/watchdog.conf.bak
 sudo sed -e 's/#watchdog-device/watchdog-device/g' -i /etc/watchdog.conf
 sudo /etc/init.d/watchdog start
 
-echo "Adding Screenly to autostart (via Supervisord)"
-sudo ln -s "$HOME/screenly/misc/supervisor_screenly.conf" /etc/supervisor/conf.d/screenly.conf
-sudo /etc/init.d/supervisor stop > /dev/null
-sudo /etc/init.d/supervisor start > /dev/null
 
 echo "Making modifications to X..."
 [ -f "$HOME/.gtkrc-2.0" ] && rm -f "$HOME/.gtkrc-2.0"
-ln -s "$HOME/screenly/misc/gtkrc-2.0" "$HOME/.gtkrc-2.0"
+ln -s "$HOME/yustplayit/misc/gtkrc-2.0" "$HOME/.gtkrc-2.0"
 [ -f "$HOME/.config/openbox/lxde$SUFFIX-rc.xml" ] && \
     mv "$HOME/.config/openbox/lxde$SUFFIX-rc.xml" "$HOME/.config/openbox/lxde$SUFFIX-rc.xml.bak"
 [ -d "$HOME/.config/openbox" ] || mkdir -p "$HOME/.config/openbox"
-ln -s "$HOME/screenly/misc/lxde-rc.xml" "$HOME/.config/openbox/lxde$SUFFIX-rc.xml"
+ln -s "$HOME/yustplayit/misc/lxde-rc.xml" "$HOME/.config/openbox/lxde$SUFFIX-rc.xml"
 [ -f "$HOME/.config/lxpanel/LXDE$SUFFIX/panels/panel" ] && \
     mv "$HOME/.config/lxpanel/LXDE$SUFFIX/panels/panel" "$HOME/.config/lxpanel/LXDE$SUFFIX/panels/panel.bak"
 
