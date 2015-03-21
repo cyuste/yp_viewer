@@ -21,7 +21,7 @@ Install Yustplayit viewer
 
 logged as the user 'pi’ run:
 
-$ curl -sL https://raw.github.com/cyuste/yp_viewer/master/misc/install.sh | bash
+$ curl -sL https://raw.githubusercontent.com/cyuste/yp_viewer/master/misc/install.sh | bash
 (If you’re running the installation over SSH, running the installation through a 'screen’ session is highly recommended.)
 
 Assuming everything went well, reboot your system. The viewer should now load. Be patient, at first it has to download the contents, so it can take a long time to start showing the images/videos.
