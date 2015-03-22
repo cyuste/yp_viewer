@@ -33,7 +33,7 @@ SCREENLY_HTML = '/tmp/yustplayit_html/'
 LOAD_SCREEN = '/yustplayit/loading.jpg'  # relative to $HOME
 UZBLRC = '/yustplayit/misc/uzbl.rc'  # relative to $HOME
 INTRO = '/yustplayit/intro-template.html'
-PLAYLIST_URL = 'http://localhost/yustplayit/web/app_dev.php/getContentList/'
+PLAYLIST_URL = 'http://192.168.1.50/yustplayit/web/app_dev.php/getContentList/'
 
 
 current_browser_url = None
@@ -78,7 +78,7 @@ class Scheduler(object):
     def refresh_playlist(self):
         logging.debug('refresh_playlist')
         time_cur = datetime.utcnow()
-        logging.debug('refresh: counter: (%s) deadline (%s) timecur (%s)', self.counter, self.deadline, time_cur)
+        logging.debug('refresh: counter: (%s) timecur (%s)', self.counter, time_cur)
         if self.index == self.nassets:
             logging.debug('updating playlist ')
             self.update_playlist()
@@ -89,7 +89,7 @@ class Scheduler(object):
         self.nassets = len(self.assets)
         self.counter = 0
         self.index = 0
-        logging.debug('update_playlist done, count %s, counter %s, index %s, deadline %s', self.nassets, self.counter, self.index, self.deadline)
+        logging.debug('update_playlist done, count %s, counter %s, index %s', self.nassets, self.counter, self.index)
 
 def generate_asset_list():
     logging.info('Generating asset-list...')
@@ -99,7 +99,6 @@ def generate_asset_list():
     response = urllib.urlopen(PLAYLIST_URL+str(dev_id))
     json = response.read()
     playlist = json_loads(json)   
-    playlist = filter(dummy_true, json)  
     
     if settings['shuffle_playlist']:
         shuffle(playlist)
