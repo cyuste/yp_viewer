@@ -30,7 +30,7 @@ sudo apt-get -y -qq upgrade > /dev/null
 echo "Installing dependencies..."
 sudo apt-get -y -qq install \
     git-core python-pip python-netifaces python-simplejson python-imaging \
-    python-dev uzbl sqlite3 supervisor omxplayer x11-xserver-utils libx11-dev \
+    python-dev uzbl omxplayer x11-xserver-utils libx11-dev \
     watchdog chkconfig feh > /dev/null
 
 echo "Downloading Screenly-OSE..."
@@ -53,7 +53,7 @@ mkdir -p "$HOME/.yustplayit"
 cp "$HOME/yustplayit/misc/viewer.conf" "$HOME/.yustplayit/"
 
 echo "Enabling Watchdog..."
-sudo modprobe bcm2708_wdog > /dev/null
+sudo modprobe bcm2708_wdog > /dev/null # This fails, attempts to access a non-existing file. Reboot helps
 sudo cp /etc/modules /etc/modules.bak
 sudo sed '$ i\bcm2708_wdog' -i /etc/modules
 sudo chkconfig watchdog on

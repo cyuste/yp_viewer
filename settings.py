@@ -83,13 +83,7 @@ class ScreenlySettings(IterableUserDict):
         for section, defaults in DEFAULTS.items():
             for field, default in defaults.items():
                 self._get(config, section, field, default)
-        try:
-            self.get_listen_ip()
-            int(self.get_listen_port())
-        except ValueError as e:
-            logging.info("Could not parse setting 'listen': %s. Using default value: '%s'." % (unicode(e), DEFAULTS['main']['listen']))
-            self['listen'] = DEFAULTS['main']['listen']
-
+                
     def save(self):
         # Write new settings to disk.
         config = ConfigParser.ConfigParser()
@@ -107,10 +101,5 @@ class ScreenlySettings(IterableUserDict):
     def get_configfile(self):
         return path.join(self.home, CONFIG_DIR, CONFIG_FILE)
 
-    def get_listen_ip(self):
-        return self['listen'].split(':')[0]
-
-    def get_listen_port(self):
-        return self['listen'].split(':')[1]
 
 settings = ScreenlySettings()
