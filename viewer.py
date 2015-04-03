@@ -33,7 +33,7 @@ SCREENLY_HTML = '/tmp/yustplayit_html/'
 LOAD_SCREEN = '/yustplayit/loading.jpg'  # relative to $HOME
 UZBLRC = '/yustplayit/misc/uzbl.rc'  # relative to $HOME
 INTRO = '/yustplayit/intro-template.html'
-PLAYLIST_URL = 'http://192.168.1.50/yustplayit/web/app_dev.php/getContentList/'
+PLAYLIST_URL = 'https://yustplayit.com/getContentList/'
 
 
 current_browser_url = None
