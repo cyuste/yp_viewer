@@ -80,7 +80,7 @@ class Scheduler(object):
         logging.debug('refresh_playlist')
         time_cur = datetime.utcnow()
         logging.debug('refresh: counter: (%s) timecur (%s)', self.counter, time_cur)
-        if self.index == self.nassets:
+        if self.index == (self.nassets - 1):
             logging.debug('updating playlist ')
             self.update_playlist()
 
@@ -246,7 +246,7 @@ def load_settings():
 
 
 def asset_loop(scheduler):
-    check_update()
+    #check_update()
     asset = scheduler.get_next_asset()
 
     if asset is None:
@@ -254,7 +254,7 @@ def asset_loop(scheduler):
         view_image(HOME + LOAD_SCREEN)
         sleep(EMPTY_PL_DELAY)
 
-    elif path.isfile(asset['uri']) or not url_fails(asset['uri']):
+    elif path.isfile(asset['uri']):
         name, mime, uri = asset['name'], asset['mimetype'], asset['uri']
         logging.info('Showing asset %s (%s)', name, mime)
         logging.debug('Asset URI %s', uri)
