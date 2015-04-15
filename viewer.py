@@ -275,7 +275,8 @@ def asset_loop(scheduler):
             sleep(duration)
     else:
         logging.info('Asset %s at %s is not available, skipping.', asset['name'], asset['uri'])
-        sh.Command('/home/pi/sync_assets.sh ' + user, _bg=True)
+        run = sh.Command('/home/pi/sync_assets.sh')
+        run(user, _bg=True)
         sleep(0.5)
 
 
