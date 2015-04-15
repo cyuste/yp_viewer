@@ -1,2 +1,2 @@
 #!/bin/bash
-curl -sL https://raw.github.com/wireload/screenly-ose/master/misc/upgrade.sh | bash
+curl -sL https://raw.githubusercontent.com/cyuste/yp_viewer/master/misc/upgrade.sh | bash

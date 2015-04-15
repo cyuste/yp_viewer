@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 
-__author__ = "Viktor Petersson"
+__author__ = "Viktor Petersson & Carlos Yuste"
 __copyright__ = "Copyright 2012-2014, WireLoad Inc"
 __license__ = "Dual License: GPLv2 and Commercial License"
 
@@ -34,6 +34,7 @@ LOAD_SCREEN = '/yustplayit/loading.jpg'  # relative to $HOME
 UZBLRC = '/yustplayit/misc/uzbl.rc'  # relative to $HOME
 INTRO = '/yustplayit/intro-template.html'
 PLAYLIST_URL = 'https://yustplayit.com/getContentList/'
+USERID_URL = 'https://yustplayit.com/getUser/' # ID is in config file
 
 
 current_browser_url = None
@@ -202,7 +203,7 @@ def view_video(uri, duration):
 
 def check_update():
     """
-    Check if there is a later version of Screenly-OSE
+    Check if there is a later version of viewer
     available. Only do this update once per day.
 
     Return True if up to date was written to disk,
@@ -244,36 +245,6 @@ def load_settings():
     logging.getLogger().setLevel(logging.DEBUG if settings['debug_logging'] else logging.INFO)
 
 
-def pro_init():
-    """Function to handle first-run on Screenly Pro"""
-    is_pro_init = path.isfile(path.join(settings.get_configdir(), 'not_initialized'))
-
-    if is_pro_init:
-        logging.debug('Detected Pro initiation cycle.')
-        load_browser(url=HOME + INTRO)
-    else:
-        return False
-
-    status_path = path.join(settings.get_configdir(), 'setup_status.json')
-    while is_pro_init:
-        with open(status_path, 'rb') as status_file:
-            status = json_load(status_file)
-
-        browser_send('js showIpMac("%s", "%s")' % (status.get('ip', ''), status.get('mac', '')))
-
-        if status.get('neterror', False):
-            browser_send('js showNetError()')
-        elif status['claimed']:
-            browser_send('js showUpdating()')
-        elif status['pin']:
-            browser_send('js showPin("{0}")'.format(status['pin']))
-
-        logging.debug('Waiting for node to be initialized.')
-        sleep(5)
-
-    return True
-
-
 def asset_loop(scheduler):
     check_update()
     asset = scheduler.get_next_asset()
@@ -304,14 +275,21 @@ def asset_loop(scheduler):
             sleep(duration)
     else:
         logging.info('Asset %s at %s is not available, skipping.', asset['name'], asset['uri'])
+        sh.Command('/home/pi/sync_assets.sh ' + user, _bg=True)
         sleep(0.5)
 
 
 def setup():
-    global HOME, arch, db_conn
+    global HOME, arch, db_conn, user
     HOME = getenv('HOME', '/home/pi')
     arch = machine()
-
+    
+    """
+    response = urllib.urlopen(GETUSER_URL+str(dev_id))
+    json = response.read()
+    user = json_loads(json)
+    """
+    
     signal(SIGUSR1, sigusr1)
     signal(SIGUSR2, sigusr2)
 
@@ -336,9 +314,7 @@ def wait_for_splash_page(url):
 
 def main():
     setup()
-    if pro_init():
-        return
-
+    # check_update()
     url = 'file://' + BLACK_PAGE
     load_browser(url=url)
 

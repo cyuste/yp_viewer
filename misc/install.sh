@@ -31,7 +31,7 @@ echo "Installing dependencies..."
 sudo apt-get -y -qq install \
     git-core python-pip python-netifaces python-simplejson python-imaging \
     python-dev uzbl omxplayer x11-xserver-utils libx11-dev \
-    watchdog chkconfig feh > /dev/null
+    watchdog chkconfig > /dev/null
 
 echo "Downloading Screenly-OSE..."
 git clone -q https://github.com/cyuste/yp_viewer.git "$HOME/yustplayit" > /dev/null
@@ -42,6 +42,7 @@ sudo pip install -r "$HOME/yustplayit/requirements.txt" -q > /dev/null
 echo "Adding Viewer to X auto start..."
 mkdir -p "$HOME/.config/lxsession/LXDE$SUFFIX/"
 echo "@$HOME/yustplayit/misc/xloader.sh" > "$HOME/.config/lxsession/LXDE$SUFFIX/autostart"
+chmod u+x xloader.sh
 
 echo "Increasing swap space to 500MB..."
 echo "CONF_SWAPSIZE=500" > "$HOME/dphys-swapfile"

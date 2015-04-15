@@ -12,6 +12,8 @@ CONFIG_FILE = 'viewer.conf'
 DEFAULTS = {
     'main': {
         'assetdir': 'yustplayit_assets',
+        'user': 'demo',
+        'deviceId': '1',
     },
     'viewer': {
         'show_splash': True,
