@@ -80,7 +80,7 @@ class Scheduler(object):
         logging.debug('refresh_playlist')
         time_cur = datetime.utcnow()
         logging.debug('refresh: counter: (%s) timecur (%s)', self.counter, time_cur)
-        if self.index == (self.nassets - 1):
+        if self.index == 0:
             logging.debug('updating playlist ')
             self.update_playlist()
 
@@ -276,7 +276,7 @@ def asset_loop(scheduler):
     else:
         logging.info('Asset %s at %s is not available, skipping.', asset['name'], asset['uri'])
         run = sh.Command('/home/pi/sync_assets.sh')
-        run(user, _bg=True)
+        run(settings['user'], _bg=True)
         sleep(0.5)
 
 
