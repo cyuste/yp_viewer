@@ -42,7 +42,7 @@ sudo pip install -r "$HOME/yustplayit/requirements.txt" -q > /dev/null
 echo "Adding Viewer to X auto start..."
 mkdir -p "$HOME/.config/lxsession/LXDE$SUFFIX/"
 echo "@$HOME/yustplayit/misc/xloader.sh" > "$HOME/.config/lxsession/LXDE$SUFFIX/autostart"
-chmod u+x "@$HOME/yustplayit/misc/xloader.sh"
+chmod u+x "$HOME/yustplayit/misc/xloader.sh"
 
 echo "Increasing swap space to 500MB..."
 echo "CONF_SWAPSIZE=500" > "$HOME/dphys-swapfile"
@@ -55,7 +55,7 @@ cp "$HOME/yustplayit/misc/viewer_template.conf" "$HOME/.yustplayit/viewer.conf"
 
 echo "Copying sync script"
 cp "$HOME/yustplayit/misc/sync_assets.sh" "$HOME/sync_assets.sh"
-chmod u+x "@$HOME/sync_assets.sh"
+chmod u+x "$HOME/sync_assets.sh"
 
 echo "Creating assets folder"
 mkdir "$HOME/yustplayit_assets"
