@@ -51,7 +51,7 @@ sudo mv "$HOME/dphys-swapfile" /etc/dphys-swapfile
 
 echo "Adding config-file"
 mkdir -p "$HOME/.yustplayit"
-cp "$HOME/yustplayit/misc/viewer_template.conf" "$HOME/.yustplayit/viewer.conf"
+
 
 echo "Copying sync script"
 cp "$HOME/yustplayit/misc/sync_assets.sh" "$HOME/sync_assets.sh"
