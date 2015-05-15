@@ -5,10 +5,14 @@ from os import path, getenv
 from sys import exit
 import ConfigParser
 import logging
+import urllib2
+import urllib
+import sh
 from UserDict import IterableUserDict
 
 CONFIG_DIR = '.yustplayit/'
 CONFIG_FILE = 'viewer.conf'
+GETCONFIG_URL = 'https://yustplayit.com/getConfig'
 DEFAULTS = {
     'main': {
         'assetdir': 'yustplayit_assets',
@@ -50,8 +54,22 @@ class ScreenlySettings(IterableUserDict):
         self.conf_file = self.get_configfile()
 
         if not path.isfile(self.conf_file):
-            logging.error('Config-file %s missing', self.conf_file)
-            exit(1)
+            logging.debug('Config-file %s missing. Trying to download', self.conf_file)
+            
+            rsaPub = open(self.home+'/.ssh/id_rsa.pub','r')
+            publicId = rsaPub.readline(1)
+            rsaPub.close()
+            values = {'publicId' : publicId}
+            data = urllib.urlencode(values)
+            req = urllib2.Request(GETCONFIG_URL, data)
+            response = urllib2.urlopen(req)
+            config = response.read()
+            
+            confFile = open(self.conf_file,'w')
+            confFile.write(config)
+            confFile.close()
+            
+            self.load()
         else:
             self.load()
         return rv

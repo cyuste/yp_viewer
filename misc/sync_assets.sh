@@ -6,7 +6,7 @@ else
     RC=1
     while [[ RC -ne 0 ]]
     do
-        rsync --delete -d $1@yustplayit.com:~/assets/* /home/pi/yustplayit_assets/
+        rsync --delete -d -d -e "ssh -o StrictHostKeyChecking=no" $1@yustplayit.com:~/assets/* /home/pi/yustplayit_assets/
         RC=$?
         sleep 300
     done

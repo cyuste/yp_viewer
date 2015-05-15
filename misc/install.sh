@@ -33,7 +33,7 @@ sudo apt-get -y -qq install \
     python-dev uzbl omxplayer x11-xserver-utils libx11-dev \
     watchdog chkconfig > /dev/null
 
-echo "Downloading Screenly-OSE..."
+echo "Downloading..."
 git clone -q https://github.com/cyuste/yp_viewer.git "$HOME/yustplayit" > /dev/null
 
 echo "Installing more dependencies..."
@@ -42,16 +42,29 @@ sudo pip install -r "$HOME/yustplayit/requirements.txt" -q > /dev/null
 echo "Adding Viewer to X auto start..."
 mkdir -p "$HOME/.config/lxsession/LXDE$SUFFIX/"
 echo "@$HOME/yustplayit/misc/xloader.sh" > "$HOME/.config/lxsession/LXDE$SUFFIX/autostart"
-chmod u+x xloader.sh
+chmod u+x "@$HOME/yustplayit/misc/xloader.sh"
 
 echo "Increasing swap space to 500MB..."
 echo "CONF_SWAPSIZE=500" > "$HOME/dphys-swapfile"
 sudo cp /etc/dphys-swapfile /etc/dphys-swapfile.bak
 sudo mv "$HOME/dphys-swapfile" /etc/dphys-swapfile
 
-echo "Adding Screenly's config-file"
+echo "Adding config-file"
 mkdir -p "$HOME/.yustplayit"
-cp "$HOME/yustplayit/misc/viewer.conf" "$HOME/.yustplayit/"
+cp "$HOME/yustplayit/misc/viewer_template.conf" "$HOME/.yustplayit/viewer.conf"
+
+echo "Copying sync script"
+cp "$HOME/yustplayit/misc/sync_assets.sh" "$HOME/sync_assets.sh"
+chmod u+x "@$HOME/sync_assets.sh"
+
+echo "Creating assets folder"
+mkdir "$HOME/yustplayit_assets"
+
+echo "Creating public key"
+ssh-keygen -t rsa -N '' -f "$HOME/.ssh/id_rsa"
+
+echo "Disabling overscan"
+sudo sed -i '/#disable_overscan=1/c\disable_overscan=1' /boot/config.txt
 
 echo "Enabling Watchdog..."
 sudo modprobe bcm2708_wdog > /dev/null # This fails, attempts to access a non-existing file. Reboot helps

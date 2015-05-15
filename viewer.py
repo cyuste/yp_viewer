@@ -285,12 +285,6 @@ def setup():
     HOME = getenv('HOME', '/home/pi')
     arch = machine()
     
-    """
-    response = urllib.urlopen(GETUSER_URL+str(dev_id))
-    json = response.read()
-    user = json_loads(json)
-    """
-    
     signal(SIGUSR1, sigusr1)
     signal(SIGUSR2, sigusr2)
 
