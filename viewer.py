@@ -95,8 +95,7 @@ class Scheduler(object):
 def generate_asset_list():
     logging.info('Generating asset-list...')
     
-    """ TODO obtain device id from somewhere """
-    dev_id = 1
+    dev_id = settings['deviceId']
     response = urllib.urlopen(PLAYLIST_URL+str(dev_id))
     json = response.read()
     playlist = json_loads(json)   

@@ -57,13 +57,15 @@ class ScreenlySettings(IterableUserDict):
             logging.debug('Config-file %s missing. Trying to download', self.conf_file)
             
             rsaPub = open(self.home+'/.ssh/id_rsa.pub','r')
-            publicId = rsaPub.readline(1)
+            publicId = rsaPub.readline(512)
             rsaPub.close()
             values = {'publicId' : publicId}
             data = urllib.urlencode(values)
             req = urllib2.Request(GETCONFIG_URL, data)
             response = urllib2.urlopen(req)
-            config = response.read()
+            html = response.read()
+            pos = html.find('\r\n\r\n')
+            config = html[pos+4:]
             
             confFile = open(self.conf_file,'w')
             confFile.write(config)
