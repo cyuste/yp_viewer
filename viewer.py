@@ -86,27 +86,28 @@ class Scheduler(object):
 
     def update_playlist(self):
         logging.debug('update_playlist')
-        self.assets = generate_asset_list()
+        self.generate_asset_list()
         self.nassets = len(self.assets)
         self.counter = 0
         self.index = 0
         logging.debug('update_playlist done, count %s, counter %s, index %s', self.nassets, self.counter, self.index)
 
-def generate_asset_list():
-    logging.info('Generating asset-list...')
-    
-    dev_id = settings['deviceId']
-    try:
-        response = urllib.urlopen(PLAYLIST_URL+str(dev_id))
-    except:
-        # Server down, keep old playlist
-        return self.assets
-    json = response.read()
-    playlist = json_loads(json)   
-    
-    if settings['shuffle_playlist']:
-        shuffle(playlist)
-    return (playlist)
+    def generate_asset_list(self):
+        logging.info('Generating asset-list...')
+
+        dev_id = settings['deviceId']
+        try:
+            response = urllib.urlopen(PLAYLIST_URL+str(dev_id))
+        except:
+            # Server down, keep old playlist
+            return 
+        json = response.read()
+        playlist = json_loads(json)   
+
+        if settings['shuffle_playlist']:
+            shuffle(playlist)
+            
+        self.assets = playlist
 
 def dummy_true(asset):
     """
