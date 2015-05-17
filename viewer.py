@@ -99,14 +99,15 @@ class Scheduler(object):
         try:
             response = urllib.urlopen(PLAYLIST_URL+str(dev_id))
         except:
-            # Server down, keep old playlist
+            logging.info("No internet connection. Keeping old list")
             return 
         json = response.read()
         playlist = json_loads(json)   
 
         if settings['shuffle_playlist']:
             shuffle(playlist)
-            
+        
+        logging.debug("Replacing asset-list")
         self.assets = playlist
 
 def dummy_true(asset):
