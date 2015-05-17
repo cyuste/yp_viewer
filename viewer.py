@@ -96,7 +96,11 @@ def generate_asset_list():
     logging.info('Generating asset-list...')
     
     dev_id = settings['deviceId']
-    response = urllib.urlopen(PLAYLIST_URL+str(dev_id))
+    try:
+        response = urllib.urlopen(PLAYLIST_URL+str(dev_id))
+    except:
+        # Server down, keep old playlist
+        return self.assets
     json = response.read()
     playlist = json_loads(json)   
     
