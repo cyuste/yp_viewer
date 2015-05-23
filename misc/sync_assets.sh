@@ -34,7 +34,7 @@ if mkdir "${LOCKDIR}" &>/dev/null; then
     RC=1
     while [[ RC -ne 0 ]]
     do
-        rsync --delete -d -e "ssh -o StrictHostKeyChecking=no" $1@yustplayit.com:~/assets/* /home/pi/yustplayit_assets/
+        rsync --delete -d -e "ssh -o StrictHostKeyChecking=no" --exclude "thumbnails" $1@yustplayit.com:~/assets/* /home/pi/yustplayit_assets/
         RC=$?
         sleep 300
     done

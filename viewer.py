@@ -259,7 +259,7 @@ def asset_loop(scheduler):
         view_image(HOME + LOAD_SCREEN)
         sleep(EMPTY_PL_DELAY)
 
-    elif path.isfile(asset['uri']):
+    elif path.isfile(asset['uri']) or not url_fails(asset['name']):
         name, mime, uri = asset['name'], asset['mimetype'], asset['uri']
         logging.info('Showing asset %s (%s)', name, mime)
         logging.debug('Asset URI %s', uri)
@@ -268,7 +268,7 @@ def asset_loop(scheduler):
         if 'image' in mime:
             view_image(uri)
         elif 'web' in mime:
-            browser_url(uri)
+            browser_url(name)
         elif 'video' in mime:
             view_video(uri, asset['duration'])
         else:
