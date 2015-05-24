@@ -184,7 +184,7 @@ def view_image(uri):
 def view_slides(uri, duration):
     for (root, dirs, files) in walk(uri):
         for name in files:
-            view_image(os.path.join(root, name))
+            view_image(path.join(root, name))
             logging.info('Sleeping for %s', duration)
             sleep(duration)    
 
@@ -266,7 +266,7 @@ def asset_loop(scheduler):
         view_image(HOME + LOAD_SCREEN)
         sleep(EMPTY_PL_DELAY)
 
-    elif path.isfile(asset['uri']) or not url_fails(asset['name']):
+    elif path.isfile(asset['uri']) or path.isdir(asset['uri']) or not url_fails(asset['name']):
         name, mime, uri = asset['name'], asset['mimetype'], asset['uri']
         logging.info('Showing asset %s (%s)', name, mime)
         logging.debug('Asset URI %s', uri)
