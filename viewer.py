@@ -6,7 +6,7 @@ __copyright__ = "Copyright 2012-2014, WireLoad Inc"
 __license__ = "Dual License: GPLv2 and Commercial License"
 
 from datetime import datetime, timedelta
-from os import path, getenv, utime
+from os import path, getenv, utime, walk
 from platform import machine
 from random import shuffle
 from requests import get as req_get
@@ -180,6 +180,13 @@ def browser_url(url, cb=lambda _: True, force=False):
 def view_image(uri):
     browser_clear()
     browser_send('js window.setimg("{0}")'.format(uri), cb=lambda b: 'COMMAND_EXECUTED' in b and 'setimg' in b)
+    
+def view_slides(uri, duration):
+    for (root, dirs, files) in os.walk(uri):
+        for name in files:
+            view_image(os.path.join(root, name))
+            logging.info('Sleeping for %s', duration)
+            sleep(duration)    
 
 
 def view_video(uri, duration):
@@ -271,6 +278,8 @@ def asset_loop(scheduler):
             browser_url(name)
         elif 'video' in mime:
             view_video(uri, asset['duration'])
+        elif 'presentation' in mime:
+            view_slides(uri, asset['duration'])
         else:
             logging.error('Unknown MimeType %s', mime)
 
