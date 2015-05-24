@@ -100,6 +100,8 @@ def url_fails(url):
         if validate_url(url):
             obj = requests.head(url, allow_redirects=True, timeout=10, verify=settings['verify_ssl'])
             assert obj.status_code in (200, 405)
+        else:
+            return True
     except (requests.ConnectionError, requests.exceptions.Timeout, AssertionError):
         return True
     else:

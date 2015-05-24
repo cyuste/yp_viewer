@@ -182,7 +182,7 @@ def view_image(uri):
     browser_send('js window.setimg("{0}")'.format(uri), cb=lambda b: 'COMMAND_EXECUTED' in b and 'setimg' in b)
     
 def view_slides(uri, duration):
-    for (root, dirs, files) in os.walk(uri):
+    for (root, dirs, files) in walk(uri):
         for name in files:
             view_image(os.path.join(root, name))
             logging.info('Sleeping for %s', duration)
