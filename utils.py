@@ -2,18 +2,11 @@ import requests
 import json
 import re
 from netifaces import ifaddresses
-from sh import grep, netstat
+from sh import grep
 from urlparse import urlparse
 from datetime import timedelta
 from settings import settings
 
-# This will only work on the Raspberry Pi,
-# so let's wrap it in a try/except so that
-# Travis can run.
-try:
-    from sh import omxplayer
-except:
-    pass
 
 
 def validate_url(string):

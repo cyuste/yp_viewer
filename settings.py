@@ -12,7 +12,7 @@ from UserDict import IterableUserDict
 
 CONFIG_DIR = '.yustplayit/'
 CONFIG_FILE = 'viewer.conf'
-GETCONFIG_URL = 'https://yustplayit.com/getConfig'
+GETCONFIG_URL = 'http://clients.yustplayit.com/getConfig'
 DEFAULTS = {
     'main': {
         'assetdir': 'yustplayit_assets',
@@ -32,7 +32,7 @@ DEFAULTS = {
 }
 
 # Initiate logging
-logging.basicConfig(level=logging.INFO,
+logging.basicConfig(level=logging.DEBUG,
                     filename='/tmp/yustplayit_viewer.log',
                     format='%(asctime)s %(message)s',
                     datefmt='%a, %d %b %Y %H:%M:%S')
@@ -40,7 +40,7 @@ logging.basicConfig(level=logging.INFO,
 # Silence urllib info messages ('Starting new HTTP connection')
 # that are triggered by the remote url availability check in view_web
 requests_log = logging.getLogger("requests")
-requests_log.setLevel(logging.WARNING)
+requests_log.setLevel(logging.DEBUG)
 
 logging.debug('Starting viewer.py')
 

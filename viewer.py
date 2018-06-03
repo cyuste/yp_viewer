@@ -15,30 +15,36 @@ from time import sleep, time
 from json import load as json_load
 from json import loads as json_loads
 from signal import signal, SIGUSR1, SIGUSR2
+from chromote import Chromote
 import logging
+import subprocess
 import sh
 import urllib2 as urllib
+import math
 #import urllib.request as urllib #Python3
 
 from settings import settings
 import html_templates
 from utils import url_fails
 
+
 SPLASH_DELAY = 60  # secs
 EMPTY_PL_DELAY = 5  # secs
 
-BLACK_PAGE = '/tmp/yustplayit_html/black_page.html'
+BLACK_PAGE = '/yustplayit/black_page.html' # relative to $HOME
 WATCHDOG_PATH = '/tmp/yustplayit.watchdog'
 SCREENLY_HTML = '/tmp/yustplayit_html/'
-LOAD_SCREEN = '/yustplayit/loading.jpg'  # relative to $HOME
+LOAD_SCREEN = '/yustplayit/loading.gif'  # relative to $HOME
 UZBLRC = '/yustplayit/misc/uzbl.rc'  # relative to $HOME
 INTRO = '/yustplayit/intro-template.html'
-PLAYLIST_URL = 'https://yustplayit.com/getContentList/'
-USERID_URL = 'https://yustplayit.com/getUser/' # ID is in config file
+PLAYLIST_URL = 'http://clients.yustplayit.com/getContentList/'
+USERID_URL = 'http://clients.yustplayit.com/getUser/' # ID is in config file
 
 
 current_browser_url = None
-browser = None
+chromebin = None
+chrome = None
+chrometab = None
 
 VIDEO_TIMEOUT = 20  # secs
 
@@ -124,93 +130,49 @@ def watchdog():
     else:
         utime(WATCHDOG_PATH, None)
 
-
 def load_browser(url=None):
-    global browser, current_browser_url
+    global chromebin, chrome, chrometab, current_browser_url
     logging.info('Loading browser...')
-
-    if browser:
-        logging.info('killing previous uzbl %s', browser.pid)
-        browser.process.kill()
 
     if not url is None:
         current_browser_url = url
 
     # --config=-       read commands (and config) from stdin
     # --print-events   print events to stdout
-    browser = sh.Command('uzbl-browser')(print_events=True, config='-', uri=current_browser_url, _bg=True)
-    logging.info('Browser loading %s. Running as PID %s.', current_browser_url, browser.pid)
-
-    uzbl_rc = 'set ssl_verify = {}\n'.format('1' if settings['verify_ssl'] else '0')
-    with open(HOME + UZBLRC) as f:  # load uzbl.rc
-        uzbl_rc = f.read() + uzbl_rc
-    browser_send(uzbl_rc)
-
-
-def browser_send(command, cb=lambda _: True):
-    if not (browser is None) and browser.process.alive:
-        while not browser.process._pipe_queue.empty():  # flush stdout
-            browser.next()
-
-        browser.process.stdin.put(command + '\n')
-        while True:  # loop until cb returns True
-            if cb(browser.next()):
-                break
-    else:
-        logging.info('browser found dead, restarting')
-        load_browser()
+    bashCommand = "google-chrome --password-store=basic --kiosk --remote-debugging-port=9222"
+    chromebin = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
+    logging.info('Browser loading %s. Running as PID %s.', current_browser_url, chromebin.pid)
+   
+    i=1 
+    while i < 7:
+        try:
+            chrome = Chromote()
+            break
+        except:
+            sleep(5)
+            i += 1
+    chrometab = chrome.tabs[0]
+    chrometab.set_url(current_browser_url)
 
 
-def browser_clear(force=False):
-    """Load a black page. Default cb waits for the page to load."""
-    browser_url('file://' + BLACK_PAGE, force=force, cb=lambda buf: 'LOAD_FINISH' in buf and BLACK_PAGE in buf)
-
-
-def browser_url(url, cb=lambda _: True, force=False):
+def browser_url(url):
     global current_browser_url
 
     if url == current_browser_url and not force:
         logging.debug('Already showing %s, keeping it.', current_browser_url)
     else:
         current_browser_url = url
-        browser_send('uri ' + current_browser_url, cb=cb)
+        chrometab.set_url(url)
         logging.info('current url is %s', current_browser_url)
 
 
 def view_image(uri):
-    browser_clear()
-    browser_send('js window.setimg("{0}")'.format(uri), cb=lambda b: 'COMMAND_EXECUTED' in b and 'setimg' in b)
-    
-def view_slides(uri, duration):
-    for (root, dirs, files) in walk(uri):
-        for name in files:
-            view_image(path.join(root, name))
-            logging.info('Sleeping for %s', duration)
-            sleep(duration)    
-
+    browser_url('file://' + uri)
 
 def view_video(uri, duration):
-    logging.debug('Displaying video %s for %s ', uri, duration)
-
-    if arch in ['armv6l', 'armv7l']:
-        player_args = ['omxplayer', uri]
-        player_kwargs = {'o': settings['audio_output'], '_bg': True, '_ok_code': [0, 124]}
-        player_kwargs['_ok_code'] = [0, 124]
-    else:
-        player_args = ['mplayer', uri, '-nosound']
-        player_kwargs = {'_bg': True}
-
-    if duration and duration != 'N/A':
-        player_args = ['timeout', VIDEO_TIMEOUT + int(duration.split('.')[0])] + player_args
-
-    run = sh.Command(player_args[0])(*player_args[1:], **player_kwargs)
-
-    browser_clear(force=True)
-    while run.process.alive:
-        watchdog()
-        sleep(1)
-    if not run.exit_code == 0:
-        logging.error('omxplayer exited with exit code %i.' % run.exit_code)
+    filename = uri + '.mp4'
+    browser_url('file://' + filename)
+   
 
 
 def check_update():
@@ -266,18 +228,26 @@ def asset_loop(scheduler):
         view_image(HOME + LOAD_SCREEN)
         sleep(EMPTY_PL_DELAY)
 
-    elif path.isfile(asset['uri']) or path.isdir(asset['uri']) or not url_fails(asset['name']):
+    elif path.isfile(asset['uri']) or path.isfile(asset['uri'] + '.mp4') or path.isdir(asset['uri']) or not url_fails(asset['name']):
         name, mime, uri = asset['name'], asset['mimetype'], asset['uri']
         logging.info('Showing asset %s (%s)', name, mime)
         logging.debug('Asset URI %s', uri)
-        watchdog()
 
         if 'image' in mime:
+            logging.debug('Showing image %s', uri)
             view_image(uri)
         elif 'web' in mime:
+            logging.debug('Showing web %s', uri)
             browser_url(name)
         elif 'video' in mime:
-            view_video(uri, asset['duration'])
+            duration = asset['duration']
+            view_video(uri, duration)
+            if duration == 0:
+                logging.debug('Video will play complete')
+                filename = uri + '.mp4'
+                duration = subprocess.check_output(['ffprobe', '-i', filename, '-show_entries', 'format=duration', '-v', 'quiet', '-of', 'csv=%s' % ("p=0")])
+            logging.info('Sleeping for %s', duration)
+            sleep(math.ceil(float(duration)))
         elif 'presentation' in mime:
             view_slides(uri, asset['duration'])
         else:
@@ -287,6 +257,7 @@ def asset_loop(scheduler):
             duration = int(asset['duration'])
             logging.info('Sleeping for %s', duration)
             sleep(duration)
+
     else:
         logging.info('Asset %s at %s is not available, skipping.', asset['name'], asset['uri'])
         run = sh.Command('/home/pi/sync_assets.sh')
@@ -305,7 +276,7 @@ def setup():
     load_settings()
 
     sh.mkdir(SCREENLY_HTML, p=True)
-    html_templates.black_page(BLACK_PAGE)
+    #html_templates.black_page(BLACK_PAGE)
 
 
 def wait_for_splash_page(url):
@@ -324,7 +295,7 @@ def wait_for_splash_page(url):
 def main():
     setup()
     # check_update()
-    url = 'file://' + BLACK_PAGE
+    url = 'file://' + HOME + BLACK_PAGE
     load_browser(url=url)
 
     scheduler = Scheduler()
